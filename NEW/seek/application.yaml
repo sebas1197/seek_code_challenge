@@ -1,0 +1,12 @@
+# application.yaml
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus,loggers
+  metrics:
+    tags:
+      application: customer-service
+logging:
+  pattern:
+    console: '{"timestamp":"%d","level":"%p","trace":"%X{traceId:-}","span":"%X{spanId:-}","logger":"%c{1}","message":"%m"}%n'

@@ -5,10 +5,12 @@ import com.seek.application.dto.CustomerRequest;
 import com.seek.application.dto.CustomerResponse;
 import com.seek.application.dto.CustomerWithEventDTO;
 import com.seek.application.mapper.CustomerMapper;
+import com.seek.domain.event.CustomerCreatedEvent;
 import com.seek.domain.exception.BusinessValidationException;
 import com.seek.domain.exception.CustomerNotFoundException;
 import com.seek.domain.model.Customer;
 import com.seek.domain.repository.CustomerRepository;
+import com.seek.infrastructure.messaging.CustomerEventProducer;
 
 import lombok.RequiredArgsConstructor;
 
@@ -31,15 +33,21 @@ public class CustomerService {
 
     private final CustomerRepository repo;
     private final CustomerMapper mapper;
+    private final CustomerEventProducer eventProducer;
 
     /* ---------- Comandos ---------- */
 
     /** Crea un nuevo cliente y devuelve su representación de respuesta. */
+
     public CustomerResponse register(CustomerRequest req) {
         validateBirthday(req.getBirthday());
 
-        Customer entity = mapper.toEntity(req);
-        Customer saved  = repo.save(entity);
+        Customer saved = repo.save(mapper.toEntity(req));
+
+        // NEW: publicar evento
+        eventProducer.send(new CustomerCreatedEvent(
+                saved.getId(), saved.getFirstName(),
+                saved.getLastName(), saved.getBirthday()));
 
         return mapper.toResponse(saved);
     }
@@ -49,7 +57,7 @@ public class CustomerService {
         validateBirthday(req.getBirthday());
 
         Customer entity = repo.findById(id)
-                              .orElseThrow(() -> new CustomerNotFoundException(id));
+                .orElseThrow(() -> new CustomerNotFoundException(id));
 
         entity.setFirstName(req.getFirstName());
         entity.setLastName(req.getLastName());
@@ -73,9 +81,9 @@ public class CustomerService {
     @Transactional(readOnly = true)
     public List<CustomerResponse> listAll() {
         return repo.findAll()
-                   .stream()
-                   .map(mapper::toResponse)
-                   .toList();
+                .stream()
+                .map(mapper::toResponse)
+                .toList();
     }
 
     /** Devuelve clientes con fecha estimada de evento (p.ej. esperanza de vida). */

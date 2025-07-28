@@ -1,4 +1,4 @@
-package com.seek.dto;
+package com.seek.application.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Past;
