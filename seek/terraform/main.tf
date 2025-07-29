@@ -6,7 +6,7 @@ terraform {
   required_providers {
     google = {
       source  = "hashicorp/google"
-      version = "~> 5.17"
+      version = "~> 4.0"
     }
     random = {
       source  = "hashicorp/random"
@@ -84,7 +84,7 @@ resource "google_secret_manager_secret" "jwt_secret" {
   secret_id = "jwt-secret"
 
   replication {
-    automatic {}
+    automatic = true
   }
 }
 
@@ -98,7 +98,7 @@ resource "google_secret_manager_secret" "db_pwd" {
   secret_id = "customer-db-pwd"
 
   replication {
-    automatic {}
+    automatic = true
   }
 }
 
