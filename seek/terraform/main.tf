@@ -84,3 +84,37 @@ resource "google_sql_database_instance" "mysql" {
     }
   }
 }
+
+
+# ───────────────────────────────────────────────────────────────
+#  Secret Manager: JWT secret
+# ───────────────────────────────────────────────────────────────
+resource "google_secret_manager_secret" "jwt_secret" {
+  secret_id = "jwt-secret"
+
+  replication {
+    automatic {}   
+  }
+}
+
+resource "google_secret_manager_secret_version" "jwt_secret_ver" {
+  secret      = google_secret_manager_secret.jwt_secret.id
+  secret_data = base64encode(var.jwt_secret)
+}
+
+
+# ───────────────────────────────────────────────────────────────
+#  Secret Manager: DB password
+# ───────────────────────────────────────────────────────────────
+resource "google_secret_manager_secret" "db_pwd" {
+  secret_id = "customer-db-pwd"
+
+  replication {
+    automatic {}
+  }
+}
+
+resource "google_secret_manager_secret_version" "db_pwd_ver" {
+  secret      = google_secret_manager_secret.db_pwd.id
+  secret_data = base64encode(random_password.db.result)
+}
