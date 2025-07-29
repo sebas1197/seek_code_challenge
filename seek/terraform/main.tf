@@ -67,3 +67,20 @@ resource "google_cloud_run_service_iam_member" "invoker" {
   role     = "roles/run.invoker"
   member   = "allAuthenticatedUsers"
 }
+
+# ───────────────────────────────────────────────────────────────
+#  Cloud SQL Instance
+# ───────────────────────────────────────────────────────────────
+resource "google_sql_database_instance" "mysql" {
+  name             = "customer-mysql"
+  database_version = "MYSQL_8_0"
+  region           = var.region
+
+  settings {
+    tier = "db-f1-micro"
+
+    ip_configuration {
+      ipv4_enabled = true
+    }
+  }
+}
